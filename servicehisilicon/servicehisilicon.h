@@ -11,6 +11,8 @@
 
 #include "hisilicon.h"
 
+#include "m3u8.h"
+
 class eStaticServiceHisiliconInfo;
 
 class eServiceFactoryHisilicon: public iServiceHandler
