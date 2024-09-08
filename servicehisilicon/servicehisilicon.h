@@ -6,6 +6,7 @@
 #include <lib/dvb/pmt.h>
 #include <lib/dvb/subtitle.h>
 #include <lib/dvb/teletext.h>
+#include <lib/dvb/metaparser.h>
 /* for subtitles */
 #include <lib/gui/esubtitle.h>
 
@@ -37,6 +38,7 @@ class eStaticServiceHisiliconInfo: public iStaticServiceInformation
 	DECLARE_REF(eStaticServiceHisiliconInfo);
 	friend class eServiceFactoryHisilicon;
 	eStaticServiceHisiliconInfo();
+	eDVBMetaParser m_parser;
 public:
 	RESULT getName(const eServiceReference &ref, std::string &name);
 	int getLength(const eServiceReference &ref);
