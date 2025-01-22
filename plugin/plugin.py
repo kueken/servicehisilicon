@@ -1,7 +1,7 @@
 from Plugins.Plugin import PluginDescriptor
 
 def autostart(reason, **kwargs):
-	from Plugins.SystemPlugins.ServiceHisilicon import servicehisilicon
+	from . import servicehisilicon
 
 def Plugins(**kwargs):
 	return [
