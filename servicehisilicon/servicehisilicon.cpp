@@ -8,6 +8,7 @@
 #include <lib/dvb/decoder.h>
 #include <lib/components/file_eraser.h>
 #include <lib/gui/esubtitle.h>
+#include <servicehisiliconrecord.h>
 #include <lib/service/service.h>
 #include <lib/gdi/gpixmap.h>
 
@@ -115,8 +116,8 @@ RESULT eServiceFactoryHisilicon::play(const eServiceReference &ref, ePtr<iPlayab
 
 RESULT eServiceFactoryHisilicon::record(const eServiceReference &ref, ePtr<iRecordableService> &ptr)
 {
-	ptr=0;
-	return -1;
+	ptr = new eServiceHisiliconRecord(ref);
+	return 0;
 }
 
 RESULT eServiceFactoryHisilicon::list(const eServiceReference &, ePtr<iListableService> &ptr)

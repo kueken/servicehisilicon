@@ -10,6 +10,7 @@
 #include <lib/gui/esubtitle.h>
 
 #include "hisilicon.h"
+#include "servicehisiliconrecord.h"
 
 class eStaticServiceHisiliconInfo;
 
