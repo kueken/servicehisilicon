@@ -3,7 +3,6 @@
 
 #include <lib/service/iservice.h>
 #include <lib/dvb/idvb.h>
-#include <lib/base/messagepump.h>
 #include <lib/base/object.h>
 #include <lib/base/ebase.h>
 
@@ -45,6 +44,7 @@ private:
     int m_state;
     int m_error;
     std::string m_filename;
+    int doRecord();
     eServiceReference m_ref;
     bool m_simulate;
 

@@ -1,8 +1,15 @@
 #include "servicehisiliconrecord.h"
-#include <lib/base/estring.h>
 #include <lib/base/init.h>
-#include <lib/base/console.h>
-#include <lib/system/init.h>
+#include <lib/base/ioprio.h>
+#include <lib/base/eerror.h>
+#include <lib/base/estring.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <lib/dvb/decoder.h>
+
 
 eServiceHisiliconRecord::eServiceHisiliconRecord(const eServiceReference &ref)
     : m_state(stateIdle), m_error(0), m_ref(ref), m_simulate(false)
