@@ -14,6 +14,7 @@ plugindir = $(libdir)/enigma2/python/Plugins/SystemPlugins/ServiceHisilicon
 plugin_LTLIBRARIES = servicehisilicon.la
 
 servicehisilicon_la_SOURCES = \
+	servicehisiliconrecord.cpp \
 	servicehisilicon.cpp \
 	pythonmodule.cpp
 
