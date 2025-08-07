@@ -17,7 +17,7 @@ eServiceHisiliconRecord::~eServiceHisiliconRecord()
 
 RESULT eServiceHisiliconRecord::connectEvent(const sigc::slot<void(iRecordableService*,int)> &event, ePtr<eConnection> &connection)
 {
-	connection = new eConnection((sigc::signal<void(iRecordableService*,int)>*)&m_event, event);
+	connection = new eConnection(m_event.connect(event));
 	return 0;
 }
 
