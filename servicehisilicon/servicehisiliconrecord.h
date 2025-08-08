@@ -11,9 +11,10 @@ class eServiceHisiliconRecord :
     public sigc::trackable
 {
     DECLARE_REF(eServiceHisiliconRecord);
+
 public:
     eServiceHisiliconRecord(const eServiceReference &ref);
-    ~eServiceHisiliconRecord();
+    virtual ~eServiceHisiliconRecord();  // <-- vtable sicherstellen
 
     RESULT connectEvent(const sigc::slot<void(iRecordableService*, int)> &event, ePtr<eConnection> &connection);
     RESULT prepare(const char *filename, time_t begTime, time_t endTime, int eit_event_id,
