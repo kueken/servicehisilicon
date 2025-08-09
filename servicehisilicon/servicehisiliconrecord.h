@@ -3,7 +3,7 @@
 
 #include <lib/service/iservice.h>
 #include <lib/dvb/idvb.h>
-#include <serviceHisilicon_h>
+#include <servicehisilicon.h>
 #include <lib/base/object.h>
 #include <lib/base/ebase.h>
 
