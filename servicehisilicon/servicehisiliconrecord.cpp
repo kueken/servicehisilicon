@@ -1,4 +1,4 @@
-#include "servicehisiliconrecord.h"
+#include <servicehisiliconrecord.h>
 #include <lib/base/init.h>
 #include <lib/base/ioprio.h>
 #include <lib/base/eerror.h>
