@@ -93,3 +93,6 @@ RESULT eServiceHisiliconRecord::subServices(ePtr<iSubserviceList> &ptr)
     return -1;
 }
 
+// sorgt dafür, dass der Compiler die vtable wirklich erzeugt
+template class ePtr<eServiceHisiliconRecord>;
+
