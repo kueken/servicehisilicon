@@ -10,6 +10,7 @@
 #include <sys/types.h>
 #include <lib/dvb/decoder.h>
 
+DEFINE_REF(eServiceHisiliconRecord);
 
 eServiceHisiliconRecord::eServiceHisiliconRecord(const eServiceReference &ref)
     : m_state(stateIdle), m_error(0), m_ref(ref), m_simulate(false)
