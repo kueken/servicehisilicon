@@ -1,7 +1,8 @@
 #ifndef __servicehisiliconrecord_h
 #define __servicehisiliconrecord_h
 
-#include <lib/service/servicerecord.h>
+#include <lib/service/iservice.h>
+#include <servicerecord.h>
 #include <lib/dvb/idvb.h>
 #include <string>
 

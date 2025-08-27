@@ -7,7 +7,8 @@ AM_CPPFLAGS = \
 
 AM_CXXFLAGS = \
 	-Wall \
-	@ENIGMA2_CFLAGS@
+	@ENIGMA2_CFLAGS@ \
+	@FFMPEG_CFLAGS@
 
 plugindir = $(libdir)/enigma2/python/Plugins/SystemPlugins/ServiceHisilicon
 
@@ -22,3 +23,5 @@ servicehisilicon_la_LDFLAGS = \
 	-avoid-version \
 	-module \
 	-shared
+	
+servicehisilicon_la_LIBADD = -lswscale -ldl -lpthread -lavformat -lavcodec -lavutil -lswresample
