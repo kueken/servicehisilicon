@@ -8,13 +8,16 @@
 #include <errno.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/wait.h>
+#include <signal.h>
 #include <lib/dvb/decoder.h>
 
 DEFINE_REF(eServiceHisiliconRecord);
 
 eServiceHisiliconRecord::eServiceHisiliconRecord(const eServiceReference &ref)
-    : m_state(stateIdle), m_error(0), m_ref(ref), m_simulate(false)
+    : m_state(stateIdle), m_error(0), m_ref(ref), m_simulate(false), m_ffmpegPid(-1)
 {
+    eDebug("[eServiceHisiliconRecord] construct for %s", m_ref.path.c_str());
 }
 
 eServiceHisiliconRecord::~eServiceHisiliconRecord()
@@ -35,6 +38,7 @@ RESULT eServiceHisiliconRecord::prepare(const char *filename, time_t begTime, ti
     m_filename = filename ? filename : "/media/hdd/default.ts";
     m_state = statePrepared;
     m_error = 0;
+    eDebug("[eServiceHisiliconRecord] prepared, filename=%s", m_filename.c_str());
     return 0;
 }
 
@@ -57,22 +61,53 @@ RESULT eServiceHisiliconRecord::start(bool simulate)
     {
         m_event(this, evRecordStarted);
         m_state = stateRecording;
+        eDebug("[eServiceHisiliconRecord] recording started with ffmpeg PID=%d", m_ffmpegPid);
     }
     return result;
 }
 
 int eServiceHisiliconRecord::doRecord()
 {
-    // Hier könnte man den Start der Hardware-Demux-Aufnahme triggern
-    // Momentan nur Stub
-    return 0;
+    if (m_filename.empty())
+        return -1;
+
+    if (m_state == stateRecording)
+        return -1;
+
+    pid_t pid = fork();
+    if (pid == 0)
+    {
+        // Kindprozess: ffmpeg starten
+        execlp("ffmpeg", "ffmpeg",
+               "-y",                       // überschreiben falls Datei existiert
+               "-i", m_ref.path.c_str(),   // Input-URL aus ServiceReference
+               "-c", "copy",               // ohne Transcoding
+               m_filename.c_str(),         // Ziel-Datei
+               (char*)nullptr);
+
+        // Falls execlp fehlschlägt:
+        _exit(1);
+    }
+    else if (pid > 0)
+    {
+        m_ffmpegPid = pid;
+        return 0;
+    }
+    else
+    {
+        eDebug("[eServiceHisiliconRecord] fork() failed!");
+        return -1;
+    }
 }
 
 RESULT eServiceHisiliconRecord::stop()
 {
-    if (m_state == stateRecording)
+    if (m_state == stateRecording && m_ffmpegPid > 0)
     {
-        // Aufnahme stoppen – bei echter Implementierung Hardware-Demux beenden
+        eDebug("[eServiceHisiliconRecord] stopping ffmpeg PID=%d", m_ffmpegPid);
+        kill(m_ffmpegPid, SIGTERM);
+        waitpid(m_ffmpegPid, nullptr, 0);
+        m_ffmpegPid = -1;
         m_state = stateIdle;
         m_event(this, evRecordStopped);
     }

@@ -31,6 +31,9 @@ public:
     RESULT getFilenameExtension(std::string &ext) { ext = ".stream"; return 0; };
 
 private:
+    pid_t m_ffmpegPid = -1;
+
+private:
     enum {
         stateIdle,
         statePrepared,
