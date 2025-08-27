@@ -118,8 +118,22 @@ RESULT eServiceFactoryHisilicon::play(const eServiceReference &ref, ePtr<iPlayab
 
 RESULT eServiceFactoryHisilicon::record(const eServiceReference &ref, ePtr<iRecordableService> &ptr)
 {
-	ptr = new eServiceHisiliconRecord(ref);
-	return 0;
+    eDebug("[eServiceHisilicon] record() called for ref: %s", ref.toString().c_str());
+
+    // Prüfen: Ist das ein klassischer DVB-Ref?
+    if (ref.type == eServiceReferenceDVB::id)
+    {
+        eDebug("[eServiceHisilicon] using kernel recorder (DVB TS dump)");
+        // Kernel-/Standardaufnahme -> NICHT FFmpeg
+        return eDVBService::record(ref, ptr);
+    }
+    else
+    {
+        eDebug("[eServiceHisilicon] using ffmpeg recorder (network/stream)");
+        // Netzwerkstreams oder Files -> unser neuer FFmpeg-Recorder
+        ptr = new eServiceHisiliconRecord(ref);
+        return 0;
+    }
 }
 
 RESULT eServiceFactoryHisilicon::list(const eServiceReference &, ePtr<iListableService> &ptr)
