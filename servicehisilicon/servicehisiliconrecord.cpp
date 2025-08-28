@@ -1,9 +1,16 @@
-#include "servicehisiliconrecord.h"
+#include <servicehisiliconrecord.h>
+#include <lib/base/init.h>
+#include <lib/base/ioprio.h>
 #include <lib/base/eerror.h>
 #include <lib/base/estring.h>
-#include <lib/dvb/pvrparse.h>
-#include <lib/dvb/edvb.h>
-#include <lib/dvb/edvbservice.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <signal.h>
+#include <lib/dvb/decoder.h>
 
 extern "C" {
 #include <libavformat/avformat.h>
