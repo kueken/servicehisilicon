@@ -22,3 +22,7 @@ servicehisilicon_la_LDFLAGS = \
 	-avoid-version \
 	-module \
 	-shared
+	
+AM_CPPFLAGS += $(shell pkg-config --cflags libavformat libavcodec libavutil libswresample libswscale)
+servicehisilicon_la_LIBADD = $(shell pkg-config --libs libavformat libavcodec libavutil libswresample libswscale)
+
