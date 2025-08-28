@@ -23,6 +23,17 @@ if test x"$with_binarycompatibledebug" = xyes ; then
 	AC_DEFINE([BINARY_COMPATIBLE_DEBUGLOG])
 fi
 
+AC_ARG_WITH([ffmpeg-includes],
+    [AS_HELP_STRING([--with-ffmpeg-includes=DIR], [Location of FFmpeg includes])],
+    [FFMPEG_CFLAGS="-I$withval"], [FFMPEG_CFLAGS=""])
+
+AC_ARG_WITH([ffmpeg-libs],
+    [AS_HELP_STRING([--with-ffmpeg-libs=DIR], [Location of FFmpeg libs])],
+    [FFMPEG_LIBS="-L$withval"], [FFMPEG_LIBS=""])
+
+AC_SUBST(FFMPEG_CFLAGS)
+AC_SUBST(FFMPEG_LIBS)
+
 AC_CONFIG_FILES([
 Makefile
 servicehisilicon/Makefile
