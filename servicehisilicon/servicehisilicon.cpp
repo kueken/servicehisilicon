@@ -116,10 +116,41 @@ RESULT eServiceFactoryHisilicon::play(const eServiceReference &ref, ePtr<iPlayab
 	return 0;
 }
 
+// --- helper: ermitteln, ob es ein Netzwerk-Stream ist (URL oder HLS) ---
+static inline bool isNetworkStreamRef(const eServiceReference &ref)
+{
+    const std::string &p = ref.path; // falls das bei dir nicht existiert, nimm: ref.getPath()
+
+    if (p.empty())
+        return false;
+
+    // Präfix-Checks (rfind(...,0) == 0 == startsWith)
+    if (p.rfind("http://", 0) == 0 || p.rfind("https://", 0) == 0 ||
+        p.rfind("http%3a//", 0) == 0 || p.rfind("https%3a//", 0) == 0 ||
+        p.rfind("rtsp://", 0) == 0 || p.rfind("rtmp://", 0) == 0)
+        return true;
+
+    // HLS-Dateien als Stream behandeln
+    if (p.find(".m3u8") != std::string::npos || p.find(".M3U8") != std::string::npos)
+        return true;
+
+    return false;
+}
+
 RESULT eServiceFactoryHisilicon::record(const eServiceReference &ref, ePtr<iRecordableService> &ptr)
 {
-	ptr = new eServiceHisiliconRecord(ref);
-	return 0;
+    if (isNetworkStreamRef(ref))
+    {
+        // Unsere eigene Netzwerk-Aufnahme (FFmpeg-Recorder)
+        ptr = new eServiceHisiliconRecord(ref);
+        eDebug("[eServiceFactoryHisilicon] record: network stream -> ServiceHisiliconRecord");
+        return 0;
+    }
+
+    // Nicht wir: DVB/Transponder o.ä. -> dem Standard-TS-Recorder von Enigma2 überlassen
+    ptr = 0;
+    eDebug("[eServiceFactoryHisilicon] record: non-network -> fallback to default DVB recorder");
+    return -1;
 }
 
 RESULT eServiceFactoryHisilicon::list(const eServiceReference &, ePtr<iListableService> &ptr)
