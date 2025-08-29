@@ -10,19 +10,19 @@ AM_CXXFLAGS = \
 	-Wall \
 	@ENIGMA2_CFLAGS@
 
-AM_LDFLAGS  = $(FFMPEG_LIBS) \
-    -lavformat -lavcodec -lavutil -lswresample -lswscale
-
 plugindir = $(libdir)/enigma2/python/Plugins/SystemPlugins/ServiceHisilicon
 
 plugin_LTLIBRARIES = servicehisilicon.la
 
 servicehisilicon_la_SOURCES = \
-	servicehisiliconrecord.cpp \
-	servicehisilicon.cpp \
-	pythonmodule.cpp
+    servicehisiliconrecord.cpp \
+    servicehisilicon.cpp \
+    pythonmodule.cpp
 
 servicehisilicon_la_LDFLAGS = \
-	-avoid-version \
-	-module \
-	-shared
+    -avoid-version \
+    -module \
+    -shared
+
+servicehisilicon_la_LIBADD = $(FFMPEG_LIBS)
+
