@@ -22,7 +22,7 @@ public:
                    const char *name, const char *descr, const char *tags, bool descramble,
                    bool recordecm, int packetsize);
     RESULT prepareStreaming(bool descramble, bool includeecm);
-    RESULT start(bool simulate=false);
+    RESULT start(const char *filename);
     RESULT stop();
     RESULT stream(ePtr<iStreamableService> &ptr);
     RESULT getError(int &error) { error = m_error; return 0; };
@@ -51,7 +51,6 @@ private:
     std::string m_filename;
     int doRecord();
     eServiceReference m_ref;
-    bool m_simulate;
 
     sigc::signal<void(iRecordableService*, int)> m_event;
 };

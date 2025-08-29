@@ -11,8 +11,11 @@
 // FFmpeg (C-API)
 extern "C" {
 #include <libavformat/avformat.h>
+#include <libavcodec/avcodec.h>
 #include <libavutil/avutil.h>
 #include <libavutil/opt.h>
+#include <libswscale/swscale.h>
+#include <libswresample/swresample.h>
 }
 
 // ---- kleine Hilfsfunktionen -------------------------------------------------
@@ -62,13 +65,27 @@ static std::string url_decode_percent(const std::string &in)
     return out;
 }
 
+// ----- Version Compatibility Macros -----
+#if LIBAVFORMAT_VERSION_MAJOR < 58
+#define MY_AV_REGISTER_ALL()   av_register_all(); avcodec_register_all();
+#define MY_AV_OPEN_INPUT(ctx, file)  av_open_input_file(&(ctx), file, NULL, 0, NULL)
+#define MY_AV_CLOSE_INPUT(ctx) av_close_input_file(ctx)
+#define MY_AV_FREE_PACKET(pkt) av_free_packet(pkt)
+#else
+#define MY_AV_REGISTER_ALL()
+#define MY_AV_OPEN_INPUT(ctx, file)  avformat_open_input(&(ctx), file, NULL, NULL)
+#define MY_AV_CLOSE_INPUT(ctx) avformat_close_input(&(ctx))
+#define MY_AV_FREE_PACKET(pkt) av_packet_unref(&(pkt))
+#endif
+
 // ---- Klassen-Implementation -------------------------------------------------
 
 DEFINE_REF(eServiceHisiliconRecord);
 
 eServiceHisiliconRecord::eServiceHisiliconRecord(const eServiceReference &ref)
-    : m_state(stateIdle), m_error(0), m_ref(ref), m_simulate(false)
+    : m_ref(ref), m_outctx(nullptr)
 {
+    MY_AV_REGISTER_ALL();
 }
 
 eServiceHisiliconRecord::~eServiceHisiliconRecord()
@@ -102,23 +119,37 @@ RESULT eServiceHisiliconRecord::prepareStreaming(bool /*descramble*/, bool /*inc
     return 0;
 }
 
-RESULT eServiceHisiliconRecord::start(bool simulate)
+RESULT eServiceHisiliconRecord::start(const char *filename)
 {
-    m_simulate = simulate;
+    int ret;
 
-    if (m_state != statePrepared)
+    // Output format context
+    if (endswith(filename, ".stream"))
+        ret = avformat_alloc_output_context2(&m_outctx, NULL, "mpegts", filename);
+    else
+        ret = avformat_alloc_output_context2(&m_outctx, NULL, NULL, filename);
+
+    if (!m_outctx || ret < 0) {
+        eDebug("[eServiceHisiliconRecord] failed to alloc output ctx");
         return -1;
-
-    int result = doRecord();  // aktuell: nur Header/Trailer → schneller Test
-    if (result == 0)
-    {
-        m_event(this, evRecordStarted);
-        m_state = stateRecording;
-        // Da wir noch keinen Loop haben, stoppen wir sofort wieder „sauber“,
-        // damit der Timer / Enigma2 nicht hängen bleibt.
-        stop();
     }
-    return result;
+
+    // open file
+    if (!(m_outctx->oformat->flags & AVFMT_NOFILE)) {
+        if (avio_open(&m_outctx->pb, filename, AVIO_FLAG_WRITE) < 0) {
+            eDebug("[eServiceHisiliconRecord] could not open output file %s", filename);
+            return -1;
+        }
+    }
+
+    // write header
+    if (avformat_write_header(m_outctx, NULL) < 0) {
+        eDebug("[eServiceHisiliconRecord] failed to write header");
+        return -1;
+    }
+
+    eDebug("[eServiceHisiliconRecord] recording started -> %s", filename);
+    return 0;
 }
 
 int eServiceHisiliconRecord::doRecord()
@@ -214,10 +245,17 @@ fail:
 
 RESULT eServiceHisiliconRecord::stop()
 {
-    if (m_state == stateRecording)
-    {
-        m_state = stateIdle;
-        m_event(this, evRecordStopped);
+    if (m_outctx) {
+        av_write_trailer(m_outctx);
+
+        if (!(m_outctx->oformat->flags & AVFMT_NOFILE)) {
+            avio_closep(&m_outctx->pb);
+        }
+
+        avformat_free_context(m_outctx);
+        m_outctx = nullptr;
+
+        eDebug("[eServiceHisiliconRecord] recording stopped");
     }
     return 0;
 }
